@@ -4,6 +4,8 @@ JDK or JRE base image based on AdoptOpenJDK and Alpine Linux.
 
 As this images provides AdoptOpenJDK 16, it's created without having to add glibc, as [JEP 386 landed support for using OpenJDK on Alpine Linux](https://openjdk.java.net/jeps/386).
 
+See the [image on Docker Hub](https://hub.docker.com/repository/docker/njmittet/alpine-adoptopenjdk). 
+
 ## Usage
 
 The JRE image is intended to be used as a base image for images running Java applications:
