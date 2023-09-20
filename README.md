@@ -1,17 +1,16 @@
-# alpine-adoptopenjdk
+# alpine-temurin
 
-JDK or JRE base image based on AdoptOpenJDK and Alpine Linux.
+A JDK or JRE base image based on [Eclipse Temurin](https://projects.eclipse.org/projects/adoptium.temurin)
+and [Alpine Linux](https://www.alpinelinux.org/).
 
-As this images provides AdoptOpenJDK 16, it's created without having to add glibc, as [JEP 386 landed support for using OpenJDK on Alpine Linux](https://openjdk.java.net/jeps/386).
-
-See the [image on Docker Hub](https://hub.docker.com/repository/docker/njmittet/alpine-adoptopenjdk). 
+See the [image on Docker Hub](https://hub.docker.com/repository/docker/njmittet/alpine-temurin).
 
 ## Usage
 
-The JRE image is intended to be used as a base image for images running Java applications:
+The JRE image is intended to be used as a base image for running Java application images:
 
 ```Dockerfile
-FROM njmittet/alpine-adoptopenjdk:16-jre-hotspot
+FROM njmittet/alpine-temurin:17-jre
 
 USER root
 ENV JAVA_DIR /opt/java
@@ -27,20 +26,19 @@ EXPOSE 9000
 CMD ["java", "-jar", "application.jar"]
 ```
 
-The JDK image is ment to be used as the build stage in a multi-stage Docker build:
+The JDK image is intended to be used in the build stage of a multi-stage Docker build:
 
 ```Dockerfile
-FROM alpine-adoptopenjdk:16-jdk-hotspot AS builder
+FROM njmittet/alpine-temurin:17-jdk AS builder
 
 WORKDIR /tmp
 
 RUN apk add --update git && \
     git clone https://github.com/njmittet/demo-application.git && \
     cd demo-application && \
-    ./gradlew build && \
-    rm -rf /var/cache/apk/*
+    ./gradlew build
 
-FROM alpine-adoptopenjdk:16-jre-hotspot
+FROM njmittet/alpine-temurin:17-jre
 
 USER root
 ENV JAVA_DIR /opt/java
@@ -51,14 +49,8 @@ RUN mkdir -p $JAVA_DIR && \
 USER java
 WORKDIR $JAVA_DIR
 
-COPY --from=builder /tmp/demo-application/build/libs/demo-application.jar .
+COPY --from=builder /tmp/demo-application/build/libs/application.jar .
 
 EXPOSE 8080
-CMD ["java", "-jar", "demo-application.jar"]
+CMD ["java", "-jar", "application.jar"]
 ```
-
-## Resources
-
-- [AdoptOpenJDK for Alpine Linux With musl libc](https://blog.adoptopenjdk.net/2021/03/adoptopenjdk-16-available/)
-- [Multi-Stage Docker Builds](https://docs.docker.com/develop/develop-images/multistage-build/)
-- [AdoptOpenJDK OpenJDK 16](https://adoptopenjdk.net/releases.html?variant=openjdk16&jvmVariant=hotspot)
